@@ -1,7 +1,8 @@
 # groovy-hotswap
 this is a project using spring feature of groovy to refresh service class
 
-首先把程序写出来，再来解释
+通过利用spring支持的动态语言特性，来实现动态刷新spring中的bean达到热更的目的
+
 ### 依赖导入
 因为要用到groovy，所以当然要将groovy的依赖导入
 本程序用的是maven
@@ -82,12 +83,17 @@ groovy.refreshCheckDelay=10000
 #logging.level.org.springframework = debug
 
 ```
+ScriptFactoryPostProcessor类是处理脚本的bean，Spring 通过一个与 ScriptFactoryPostProcessor bean 结合的 ScriptFactory 实现（在这里是一个 Groovy 工厂）创建脚本对象。ScriptFactoryPostProcessor bean 负责用由工厂创建的实际对象替换工厂 bean。
+    当 Spring 装载应用程序上下文时，它首先创建工厂 bean（例如 GroovyScriptFactory bean）。然后，执行 ScriptFactoryPostProcessor bean，用实际的脚本对象替换所有的工厂 bean。在这里可以看到加载的bean的setBeanClassName都是org.springframework.scripting.groovy.GroovyScriptFactory，然后ScriptFactoryPostProcessor再将GroovyScriptFactory替换成脚本对象
+    
 ### 编写业务类
 首先建立一个GroovyService接口
-然后，**在main目录下，建立groovy/com/ssx/groovyhotswap/service/impl/GroovyServiceImpl类，继承GroovyService，且此目录Unmark Sources Root**
+然后，**在main目录下，建立groovy/com/ssx/groovyhotswap/service/impl/GroovyServiceImpl类，继承GroovyService，且此目录Unmark Sources Root**,
+因为脚本类不能编译成class文件到执行目录classes下，只能是java源文件。
 GroovyServiceImpl类有没有@Service注解都是无所谓的
 
 ### 编写pom文件
+配置maven插件来实现清除执行目录下的脚本和将groovy目录下的脚本复制到执行目录下
 ```
 <plugin>
   <groupId>org.apache.maven.plugins</groupId>
